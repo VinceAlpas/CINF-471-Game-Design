@@ -20,7 +20,7 @@ public class testing : MonoBehaviour
         if(t.position.y > 10)
         {
             speed = speed * -1;
-        }else if (t.position.y < -10)
+        }else if (t.position.y < 0)
         {
             speed = speed * -1;
         }
