@@ -16,7 +16,7 @@ public class LavaDie : MonoBehaviour
         
     }
 
-    // This function runs when an object enters the trigger collider
+    // OnTrigger
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player")) // Ensure the player has the "Player" tag
