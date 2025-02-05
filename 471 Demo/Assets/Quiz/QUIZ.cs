@@ -13,7 +13,7 @@ public class Quiz : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        GameObject friend = GameObject.Find("friend");
+        GameObject friend = GameObject.Find("Billy");
         rb = GetComponent<Rigidbody>();
         print("Hi " + friend.name + "!");
         print("I think I've passed the quiz!");
