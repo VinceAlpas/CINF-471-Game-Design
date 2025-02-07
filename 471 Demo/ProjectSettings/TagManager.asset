@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Lava
+  - friend
   layers:
   - Default
   - TransparentFX
