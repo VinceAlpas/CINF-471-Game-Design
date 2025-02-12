@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8043244158545773790}
   - component: {fileID: 4884315377433405335}
   - component: {fileID: 4021860696156851054}
+  - component: {fileID: 5048147421800268066}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -29,8 +30,8 @@ Transform:
   m_GameObject: {fileID: 2281308430462588298}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.8340892, y: 7.762424, z: 1.2544594}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 1.7386, y: 8.5379, z: 1.2544594}
+  m_LocalScale: {x: 4.9311185, y: 4.313893, z: 2.5532}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -66,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 5508c76b1c089436b8146732199bd33c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -121,3 +122,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe8ef55c3791742c1b1e9a9470e94df1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 5
+  speed: 3
+  chargeSpeed: 6
+  sightRange: 8
+  chargeDistance: 4
+  attackRange: 1.5
+  enemyPrefab: {fileID: 0}
+--- !u!54 &5048147421800268066
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2281308430462588298}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0

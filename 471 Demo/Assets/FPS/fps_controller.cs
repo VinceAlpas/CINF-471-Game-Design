@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class fps_controller : MonoBehaviour
 {
     [Header("Player Settings")]
-    [SerializeField] float speed = 2.0f;
+    [SerializeField] float speed = 5f;
     [SerializeField] float mouseSensitivity = 100;
     [SerializeField] GameObject cam;
 
