@@ -4,8 +4,8 @@ using System.Collections;
 public class EnemyScript : MonoBehaviour
 {
     [SerializeField] int health = 5;
-    [SerializeField] float speed = 1f;
-    [SerializeField] float chargeSpeed = 1f;
+    [SerializeField] float speed = 4f;
+    [SerializeField] float chargeSpeed = 6f;
     [SerializeField] float sightRange = 8f;
     [SerializeField] float chargeDistance = 4f;
     [SerializeField] float attackRange = 1.5f;
@@ -17,25 +17,30 @@ public class EnemyScript : MonoBehaviour
     private bool isCharging = false;
     private bool canDamagePlayer = true;
 
-    [SerializeField] GameObject enemyPrefab; // Prefab for respawning
-    [SerializeField] Transform spawnPoint;   // Fixed spawn location (Set in Inspector)
-    [SerializeField] float spawnHeightOffset = 2f; // Adjusts spawn height above the ground
+    [SerializeField] GameObject enemyPrefab;
+    [SerializeField] Transform spawnPoint;
+    [SerializeField] float spawnHeightOffset = 2f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
 
-        if (spawnPoint == null)
+        if (rb == null)
         {
-            Debug.LogError("❌ ERROR: SpawnPoint is not assigned! Assign it in the Inspector.");
+            Debug.LogError("ERROR: Rigidbody component is missing from the enemy.");
             return;
         }
 
-        // Set the initial position from a fixed spawn point
+        if (spawnPoint == null)
+        {
+            Debug.LogError("ERROR: SpawnPoint is not assigned! Assign it in the Inspector.");
+            return;
+        }
+
         transform.position = new Vector3(spawnPoint.position.x, spawnPoint.position.y + spawnHeightOffset, spawnPoint.position.z);
         transform.rotation = spawnPoint.rotation;
 
-        InvokeRepeating(nameof(FindPlayer), 0f, 2f); // Check for the player every 2 seconds
+        InvokeRepeating(nameof(FindPlayer), 0f, 2f);
     }
 
     void Update()
@@ -71,26 +76,25 @@ public class EnemyScript : MonoBehaviour
 
             if (playerHealth == null)
             {
-                Debug.LogError("❌ ERROR: Player exists but does NOT have a PlayerHealth component!");
+                Debug.LogError("ERROR: Player exists but does not have a PlayerHealth component.");
             }
             else
             {
-                Debug.Log("✅ Enemy successfully found the Player!");
+                Debug.Log("Enemy successfully found the player.");
             }
         }
         else
         {
-            Debug.LogError("❌ ERROR: Player reference is NULL! Retrying...");
+            Debug.LogError("ERROR: Player reference is null. Retrying...");
         }
     }
 
     void FollowPlayer()
     {
-        if (player == null) return;
+        if (player == null || isCharging) return; // If charging, don't follow normally
 
-        isCharging = false;
         Vector3 direction = (player.position - transform.position).normalized;
-        rb.linearVelocity = new Vector3(direction.x * speed, rb.linearVelocity.y, direction.z * speed);
+        rb.MovePosition(transform.position + direction * speed * Time.deltaTime);
     }
 
     void ChargeAtPlayer()
@@ -99,8 +103,15 @@ public class EnemyScript : MonoBehaviour
         {
             isCharging = true;
             Vector3 chargeDirection = (player.position - transform.position).normalized;
-            rb.linearVelocity = new Vector3(chargeDirection.x * chargeSpeed, rb.linearVelocity.y, chargeDirection.z * chargeSpeed);
+            rb.linearVelocity = chargeDirection * chargeSpeed; // Uses Rigidbody velocity to charge
+            Invoke(nameof(StopCharging), 1f); // Stops after 1 second
         }
+    }
+
+    void StopCharging()
+    {
+        isCharging = false;
+        rb.linearVelocity = Vector3.zero; // Stop movement after charging
     }
 
     void AttackPlayer()
@@ -109,27 +120,33 @@ public class EnemyScript : MonoBehaviour
 
         if (player == null)
         {
-            Debug.LogError("❌ ERROR: Player reference is NULL during attack! Retrying...");
+            Debug.LogError("ERROR: Player reference is null during attack. Retrying...");
             FindPlayer();
             return;
+        }
+
+        if (playerHealth == null)
+        {
+            Debug.LogError("ERROR: PlayerHealth component is null. Attempting reassignment...");
+            playerHealth = player.GetComponent<PlayerHealth>();
         }
 
         if (playerHealth != null)
         {
             playerHealth.TakeDamage(20);
-            Debug.Log($"💥 Player took 20 damage! Health left: {playerHealth.health}");
+            Debug.Log($"Player took 20 damage. Health left: {playerHealth.health}");
             StartCoroutine(DamageCooldown());
         }
         else
         {
-            Debug.LogError("❌ ERROR: PlayerHealth component is NULL during attack!");
+            Debug.LogError("ERROR: PlayerHealth component is still null.");
         }
     }
 
     public void TakeDamage(int damage)
     {
         health -= damage;
-        Debug.Log($"💥 Enemy took {damage} damage! Remaining Health: {health}");
+        Debug.Log($"Enemy took {damage} damage. Remaining health: {health}");
 
         if (health <= 0)
         {
@@ -139,14 +156,14 @@ public class EnemyScript : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("☠️ Enemy has been defeated!");
+        Debug.Log("Enemy has been defeated.");
         StartCoroutine(RespawnEnemy());
         gameObject.SetActive(false);
     }
 
     IEnumerator RespawnEnemy()
     {
-        Debug.Log("🔄 Respawning enemy in 5 seconds...");
+        Debug.Log("Respawning enemy in 5 seconds...");
         yield return new WaitForSeconds(5f);
 
         if (enemyPrefab != null && spawnPoint != null)
@@ -154,11 +171,11 @@ public class EnemyScript : MonoBehaviour
             Vector3 adjustedSpawnPosition = new Vector3(spawnPoint.position.x, spawnPoint.position.y + spawnHeightOffset, spawnPoint.position.z);
             GameObject newEnemy = Instantiate(enemyPrefab, adjustedSpawnPosition, spawnPoint.rotation);
             newEnemy.GetComponent<EnemyScript>().FindPlayer();
-            Debug.Log($"✅ Enemy has respawned at: {adjustedSpawnPosition}");
+            Debug.Log($"Enemy has respawned at: {adjustedSpawnPosition}");
         }
         else
         {
-            Debug.LogError("❌ ERROR: Enemy prefab or spawn point is missing! Assign them in the Inspector.");
+            Debug.LogError("ERROR: Enemy prefab or spawn point is missing. Assign them in the Inspector.");
         }
     }
 

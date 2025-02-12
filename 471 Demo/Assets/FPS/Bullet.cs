@@ -16,7 +16,7 @@ public class Bullet : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // Check if it hits an enemy
-        EnemyScript enemy = other.GetComponent<EnemyScript>();
+        EnemyScript enemy = other.GetComponentInParent<EnemyScript>(); // Fixes nested colliders issue
         if (enemy != null)
         {
             enemy.TakeDamage(1);

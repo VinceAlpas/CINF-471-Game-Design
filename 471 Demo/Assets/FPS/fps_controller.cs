@@ -4,13 +4,13 @@ using UnityEngine.InputSystem;
 public class fps_controller : MonoBehaviour
 {
     [Header("Player Settings")]
-    [SerializeField] float speed = 5f;
+    [SerializeField] float speed = 40f;
     [SerializeField] float mouseSensitivity = 100;
     [SerializeField] GameObject cam;
 
     [Header("Shooting Settings")]
     [SerializeField] GameObject bullet;
-    [SerializeField] GameObject bulletSpawner; 
+    [SerializeField] GameObject bulletSpawner;
 
     Vector2 movement;
     Vector2 mouseMovement;
@@ -25,26 +25,26 @@ public class fps_controller : MonoBehaviour
         // Debug: Confirm bulletSpawner and bullet are assigned at start
         if (bulletSpawner == null)
         {
-            Debug.LogError("❌ BulletSpawner is MISSING at Start! Check Inspector.");
+            Debug.LogError("BulletSpawner is missing at Start. Check Inspector.");
         }
         else
         {
-            Debug.Log("✅ BulletSpawner is assigned correctly at Start.");
+            Debug.Log("BulletSpawner is assigned correctly at Start.");
         }
 
         if (bullet == null)
         {
-            Debug.LogWarning("⚠️ BulletPrefab was not set in the Inspector! Attempting to load from Resources.");
+            Debug.LogWarning("BulletPrefab was not set in the Inspector. Attempting to load from Resources.");
             bullet = Resources.Load<GameObject>("Bullet"); // Ensure the prefab is always accessible
         }
 
         if (bullet != null)
         {
-            Debug.Log("✅ BulletPrefab successfully assigned.");
+            Debug.Log("BulletPrefab successfully assigned.");
         }
         else
         {
-            Debug.LogError("❌ BulletPrefab is STILL missing! Assign it in the Inspector.");
+            Debug.LogError("BulletPrefab is still missing. Assign it in the Inspector.");
         }
     }
 
@@ -85,30 +85,33 @@ public class fps_controller : MonoBehaviour
 
     void OnAttack(InputValue attackVal)
     {
-        Debug.Log("🔫 OnAttack() called!");
+        Debug.Log("OnAttack() called.");
 
-        // Ensure BulletPrefab exists before shooting
         if (bullet == null)
         {
-            Debug.LogError("❌ BulletPrefab is missing in OnAttack! Restoring reference...");
-            bullet = Resources.Load<GameObject>("Bullet"); // Reload it just in case
-
-            if (bullet == null)
-            {
-                Debug.LogError("❌ BulletPrefab is STILL missing! Assign it in the Inspector.");
-                return;
-            }
-        }
-
-        // Ensure BulletSpawner exists before shooting
-        if (bulletSpawner == null)
-        {
-            Debug.LogError("❌ BulletSpawner is missing in OnAttack! Assign it in Inspector.");
+            Debug.LogError("BulletPrefab is missing in OnAttack. Assign it in the Inspector.");
             return;
         }
 
-        // SHOOT THE BULLET
-        Debug.Log("✅ Shooting Bullet!");
-        Instantiate(bullet, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
+        if (bulletSpawner == null)
+        {
+            Debug.LogError("BulletSpawner is missing in OnAttack. Assign it in Inspector.");
+            return;
+        }
+
+        // Shoot the bullet
+        GameObject newBullet = Instantiate(bullet, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
+
+        Rigidbody bulletRb = newBullet.GetComponent<Rigidbody>();
+        if (bulletRb != null)
+        {
+            bulletRb.AddForce(bulletSpawner.transform.forward * 10f, ForceMode.Impulse);
+        }
+        else
+        {
+            Debug.LogError("Bullet has no Rigidbody. Add one to the Bullet prefab.");
+        }
+
+        Debug.Log("Shooting Bullet.");
     }
 }
