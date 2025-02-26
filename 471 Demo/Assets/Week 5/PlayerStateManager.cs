@@ -28,7 +28,7 @@ public class PlayerStateManager : MonoBehaviour
     public float gravity = -9.81f;
     public float verticalVelocity;
 
-    // 🔥 Sword & Animator References
+    // Sword & Animator References
     public GameObject sword;
     public Animator animator;
 
@@ -132,7 +132,7 @@ public class PlayerStateManager : MonoBehaviour
             Debug.Log("Sword Attack!");
             isAttacking = true;
 
-            // 🔥 **Play Attack Animation**
+            // **Play Attack Animation**
             animator.SetTrigger("Attack");
 
             // **Switch to Attack State**
@@ -156,7 +156,7 @@ public class PlayerStateManager : MonoBehaviour
         }
     }
 
-    // ✅ Helper Function to Move the Player
+    // Helper Function to Move the Player
     public void MovePlayer(float speed)
     {
         if (isAttacking) return; // Prevent movement during attack
@@ -167,7 +167,7 @@ public class PlayerStateManager : MonoBehaviour
         controller.Move(move * Time.deltaTime * speed);
     }
 
-    // ✅ Switching Between States
+    // Switching Between States
     public void SwitchState(PlayerBaseState newState)
     {
         currentState = newState;

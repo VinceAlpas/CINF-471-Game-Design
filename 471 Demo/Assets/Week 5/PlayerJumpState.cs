@@ -4,7 +4,7 @@ public class PlayerJumpState : PlayerBaseState
 {
     public override void EnterState(PlayerStateManager player)
     {
-        Debug.Log("I'm Jumping!"); //  Added Jump Message
+        Debug.Log("I'm Jumping!"); 
         player.verticalVelocity = player.jumpForce; //  Apply jump force
     }
 
