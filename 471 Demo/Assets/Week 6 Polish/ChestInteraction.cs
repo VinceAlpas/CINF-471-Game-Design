@@ -1,15 +1,34 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // Required for the new Input System
 
 public class ChestInteraction : MonoBehaviour
 {
     public Animator chestAnimator;
+    public ParticleSystem chestParticles;
     private bool isOpen = false;
     private bool playerNearby = false;
 
-    void Update()
+    private InputSystem_Actions inputActions; // Match the generated class name
+
+    private void Awake()
     {
-        // Check if player is nearby and presses E
-        if (playerNearby && Input.GetKeyDown(KeyCode.E) && !isOpen)
+        inputActions = new InputSystem_Actions(); // Use the correct class
+        inputActions.Player.Interact.performed += ctx => TryOpenChest();
+    }
+
+    private void OnEnable()
+    {
+        inputActions.Enable();
+    }
+
+    private void OnDisable()
+    {
+        inputActions.Disable();
+    }
+
+    private void TryOpenChest()
+    {
+        if (playerNearby && !isOpen)
         {
             OpenChest();
         }
@@ -17,11 +36,16 @@ public class ChestInteraction : MonoBehaviour
 
     void OpenChest()
     {
-        chestAnimator.SetTrigger("Open"); // Play animation
+        chestAnimator.SetTrigger("OpenChest"); // Trigger the animation
+
+        if (chestParticles != null)
+        {
+            chestParticles.Play(); // Play particle effect
+        }
+
         isOpen = true;
     }
 
-    // Detect when player is near
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -30,7 +54,6 @@ public class ChestInteraction : MonoBehaviour
         }
     }
 
-    // Detect when player leaves
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
