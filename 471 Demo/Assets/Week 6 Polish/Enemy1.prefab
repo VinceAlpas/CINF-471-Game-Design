@@ -116,9 +116,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 84
+  m_Constraints: 80
   m_CollisionDetection: 1
 --- !u!114 &3728242199877186808
 MonoBehaviour:
@@ -141,6 +141,7 @@ MonoBehaviour:
   moveSpeed: 3
   chaseSpeed: 5
   chaseDistance: 5
+  attackDistance: 1.5
   bloodEffectPrefab: {fileID: 6028944050822232341, guid: abd0aa1ed79245c4f85ab2ce45395882, type: 3}
 --- !u!136 &2170324787237467480
 CapsuleCollider:
