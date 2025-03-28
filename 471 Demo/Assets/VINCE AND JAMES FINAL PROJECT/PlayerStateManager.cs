@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerStateManager : MonoBehaviour
 {
@@ -14,9 +15,14 @@ public class PlayerStateManager : MonoBehaviour
 
     [HideInInspector] public Vector2 movement;
 
+     public Vector2 lookInput;
+     public Transform playerCamera;
+
+     public float mouseSensitivity = 30f;
+    public float xRotation = 0f;
+
     public float default_speed = 2f;
     public float sprint_speed = 4f;
-    public float sneak_speed = 1f;
 
     public bool isSneaking = false;
     public bool isSprinting = false;
@@ -32,9 +38,26 @@ public class PlayerStateManager : MonoBehaviour
     public GameObject sword;
     public Animator animator;
 
+    // Bullet & Bullet Spawner References
+    public Transform bulletSpawner;
+    public GameObject bulletPrefab;
+    private bool isFiring = false;
+    private float fireRate = 0.1f;
+    private float lastFireTime = 0f;
+
+    // Fall damage
+    public float fallThreshold = -10f;
+    // Player Health
+    public int playerHealth = 100;
+
+    // To track the previous state
+    private PlayerBaseState previousState;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         animator = GetComponent<Animator>(); // Ensure Animator is assigned
         SwitchState(idleState);
     }
@@ -52,6 +75,14 @@ public class PlayerStateManager : MonoBehaviour
         controller.Move(move * Time.deltaTime);
 
         currentState.UpdateState(this);
+
+        HandleMouseLook();
+        HandleShooting();
+
+        if (transform.position.y < fallThreshold)
+        {
+            Die();
+        }
     }
 
     // Handle Movement Input
@@ -87,12 +118,12 @@ public class PlayerStateManager : MonoBehaviour
     {
         isSneaking = sneakVal.isPressed;
 
-        if (isSneaking)
+        if (isSneaking && !isSprinting)
         {
             Debug.Log("Sneaking Activated");
             SwitchState(sneakState);
         }
-        else
+        else if (!isSneaking && !isSprinting)
         {
             Debug.Log("Sneaking Deactivated");
             SwitchState(walkState);
@@ -103,12 +134,11 @@ public class PlayerStateManager : MonoBehaviour
     void OnSprint(InputValue sprintVal)
     {
         isSprinting = sprintVal.isPressed;
-
-        if (isSprinting)
+        if (isSprinting && !isSneaking)
         {
             SwitchState(sprintState);
         }
-        else if (movement.magnitude > 0.1f)
+        else if (isSprinting && !isSneaking)
         {
             SwitchState(walkState);
         }
@@ -172,5 +202,49 @@ public class PlayerStateManager : MonoBehaviour
     {
         currentState = newState;
         currentState.EnterState(this);
+    }
+
+    void HandleShooting()
+    {
+        if (Mouse.current.rightButton.isPressed && Time.time > lastFireTime + fireRate)
+        {
+            FireBullet();
+            lastFireTime = Time.time;
+        }
+    }
+
+    void FireBullet()
+    {
+        if (bulletPrefab == null || bulletSpawner == null)
+        {
+            Debug.LogError("❌ Bullet Prefab or Spawner is missing.");
+            return;
+        }
+
+        GameObject newBullet = Instantiate(bulletPrefab, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
+        Rigidbody rb = newBullet.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = bulletSpawner.transform.forward * 20f;
+        }
+
+        Destroy(newBullet, 5f);
+    }
+
+    private void HandleMouseLook()
+    {
+        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
+        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
+
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        transform.Rotate(Vector3.up * mouseX);
+    }
+
+    void Die()
+    {
+        Debug.Log("Player has fallen off the platform!");
     }
 }

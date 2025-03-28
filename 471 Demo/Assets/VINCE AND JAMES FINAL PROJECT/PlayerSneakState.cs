@@ -9,7 +9,8 @@ public class PlayerSneakState : PlayerBaseState
 
     public override void UpdateState(PlayerStateManager player)
     {
-        player.MovePlayer(player.sneak_speed);
+        player.MovePlayer(player.default_speed / 2);
+
 
         // Exit to Idle if no movement
         if (player.movement.magnitude < 0.1f)
