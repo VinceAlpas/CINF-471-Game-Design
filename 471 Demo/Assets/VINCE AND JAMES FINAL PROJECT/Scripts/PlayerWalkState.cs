@@ -5,6 +5,18 @@ public class PlayerWalkState : PlayerBaseState
     public override void EnterState(PlayerStateManager player)
     {
         Debug.Log("I'm walking!");
+
+        Collider[] enemiesInRange = Physics.OverlapSphere(player.transform.position, 6f);
+
+        foreach (Collider enemyCollider in enemiesInRange)
+        {
+            EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
+            if (enemy != null)
+            {
+                enemy.SetTarget(player.gameObject);  
+                enemy.SetState(EnemyAI.State.Follow);  
+            }
+        }
     }
 
     public override void UpdateState(PlayerStateManager player)

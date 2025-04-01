@@ -5,34 +5,38 @@ using UnityEngine.SceneManagement;
 public class PlayerStateManager : MonoBehaviour
 {
     [HideInInspector] public PlayerBaseState currentState;
-
     [HideInInspector] public PlayerIdleState idleState = new PlayerIdleState();
     [HideInInspector] public PlayerWalkState walkState = new PlayerWalkState();
     [HideInInspector] public PlayerSneakState sneakState = new PlayerSneakState();
     [HideInInspector] public PlayerSprintState sprintState = new PlayerSprintState();
     [HideInInspector] public PlayerJumpState jumpState = new PlayerJumpState();
     [HideInInspector] public PlayerAttackState attackState = new PlayerAttackState();
+    [HideInInspector] public PlayerDoubleJumpState doubleJumpState = new PlayerDoubleJumpState();
 
     [HideInInspector] public Vector2 movement;
-
      public Vector2 lookInput;
      public Transform playerCamera;
-
      public float mouseSensitivity = 30f;
-    public float xRotation = 0f;
+     public float xRotation = 0f;
+     
+     public float default_speed = 2f;
+     public float sprint_speed = 3f;
+     public float sneak_speed = 0.5f;
+     public float jumpForce = 0.3f;
+     public bool isSneaking = false;
+     public bool isSprinting = false;
+     public bool IsJumping = false;
+     public bool isAttacking = false;
+     public CharacterController controller;
+     public Vector3 velocity;
+     public float gravity = -20f;
+     public float verticalVelocity;
+     public bool isGrounded;
+     
+     private bool hasDoubleJumped = false;
+     private float lastJumpTime = -100f;
 
-    public float default_speed = 2f;
-    public float sprint_speed = 4f;
-
-    public bool isSneaking = false;
-    public bool isSprinting = false;
-    public bool isGrounded;
-    public bool isAttacking = false;
-
-    public CharacterController controller;
-    public float jumpForce = 5f;
-    public float gravity = -9.81f;
-    public float verticalVelocity;
+     public float doubleJumpWindow = 0.3f;
 
     // Sword & Animator References
     public GameObject sword;
@@ -65,16 +69,26 @@ public class PlayerStateManager : MonoBehaviour
     void Update()
     {
         isGrounded = controller.isGrounded;
-        if (isGrounded && verticalVelocity < 0)
+        if (isGrounded && velocity.y < 0)
         {
-            verticalVelocity = -2f; // Keeps character grounded
+            velocity.y = -2f; // Keeps character grounded
+
+            if(movement.magnitude > 0.1f)
+            {
+                if (isSprinting)
+                    SwitchState(sprintState);
+                else
+                    SwitchState(walkState);
+            }
+            else
+            {
+            SwitchState(idleState);
+            }
         }
 
-        verticalVelocity += gravity * Time.deltaTime;
-        Vector3 move = new Vector3(movement.x, verticalVelocity, movement.y);
-        controller.Move(move * Time.deltaTime);
-
         currentState.UpdateState(this);
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
 
         HandleMouseLook();
         HandleShooting();
@@ -113,6 +127,11 @@ public class PlayerStateManager : MonoBehaviour
         }
     }
 
+    void OnLook(InputValue lookVal)
+    {
+        lookInput = lookVal.Get<Vector2>();
+    }
+
     // Handle Sneak Input (C key)
     void OnSneak(InputValue sneakVal)
     {
@@ -149,8 +168,19 @@ public class PlayerStateManager : MonoBehaviour
     {
         if (isGrounded)
         {
-            Debug.Log("I'm Jumping!");
-            SwitchState(jumpState);
+            // normal jump
+            JumpPlayer();
+            lastJumpTime = Time.time;
+            hasDoubleJumped = false;
+        }
+        else
+        {
+            // double jump
+            if (Time.time - lastJumpTime <= doubleJumpWindow && !hasDoubleJumped)
+            {
+                SwitchState(doubleJumpState);
+                doubleJumpState.RecordJumpTime();
+            }
         }
     }
 
@@ -189,17 +219,28 @@ public class PlayerStateManager : MonoBehaviour
     // Helper Function to Move the Player
     public void MovePlayer(float speed)
     {
+        Vector3 forward = playerCamera.forward;
+        Vector3 right = playerCamera.right;
+
+        forward.y = 0f;
+        right.y = 0f;
+
+        forward.Normalize();
+        right.Normalize();
+
         if (isAttacking) return; // Prevent movement during attack
 
         Vector3 move = new Vector3(movement.x, 0, movement.y);
         move = transform.right * move.x + transform.forward * move.z; // Ensure movement is relative to camera
 
+        Vector3 moveDirection = forward * movement.y + right * movement.x;
         controller.Move(move * Time.deltaTime * speed);
     }
 
     // Switching Between States
     public void SwitchState(PlayerBaseState newState)
     {
+        currentState?.ExitState(this);
         currentState = newState;
         currentState.EnterState(this);
     }
@@ -241,6 +282,14 @@ public class PlayerStateManager : MonoBehaviour
 
         playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         transform.Rotate(Vector3.up * mouseX);
+    }
+
+    public void JumpPlayer()
+    {
+        if (isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+        }
     }
 
     void Die()
