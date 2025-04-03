@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/FPS/FPS.unity
     guid: 31aa81ebe09974ec49f5482c3171dc76
   - enabled: 1
-    path: Assets/VINCE AND JAMES FINAL PROJECT/Week 6 Polish.unity
+    path: Assets/VINCE AND JAMES FINAL PROJECT/Scenes/Week 6 Polish.unity
     guid: 94369f0dda155ab41abdc65e971e5425
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
